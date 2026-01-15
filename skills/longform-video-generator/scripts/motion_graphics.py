@@ -46,8 +46,31 @@ class OverlayPosition(Enum):
     # Full screen (for transitions)
     FULLSCREEN = "fullscreen"
 
+    # Broadcast-style overlays (news/sports)
+    BANNER_TOP = "banner_top"           # Full-width bar at top (breaking news)
+    BANNER_BOTTOM = "banner_bottom"     # Full-width bar at bottom (headline)
+    TICKER = "ticker"                   # Scrolling text (news ticker)
+    SIDEBAR_LEFT = "sidebar_left"       # L-bar style info panel
+    SIDEBAR_RIGHT = "sidebar_right"     # R-bar style info panel
+
     # Custom (x, y coordinates)
     CUSTOM = "custom"
+
+
+class OverlayType(Enum):
+    """Types of motion graphics overlays."""
+    # Standard overlays
+    LOWER_THIRD = "lower_third"     # Name/title graphic
+    LOGO = "logo"                   # Corner watermark
+    CTA = "cta"                     # Call-to-action
+    LOTTIE = "lottie"               # Animated vector
+
+    # Broadcast-style (news/sports/live)
+    BANNER = "banner"               # Full-width headline bar
+    TICKER = "ticker"               # Scrolling news ticker
+    CHYRON = "chyron"               # Identity graphic (same as lower third)
+    BUG = "bug"                     # Small corner logo
+    SIDEBAR = "sidebar"             # L-bar/info panel
 
 
 @dataclass
@@ -745,6 +768,266 @@ class TextOverlayGenerator:
 
         subprocess.run(cmd, capture_output=True)
         return output if output.exists() else None
+
+
+class BroadcastOverlays:
+    """
+    Broadcast-style overlays: banners, tickers, chyrons.
+
+    Terminology:
+    - Chyron: Name/title graphic (lower third) - identifies speaker/subject
+    - Banner: Full-width headline bar (breaking news, alerts)
+    - Ticker: Scrolling text strip (news crawler, stock prices)
+    - Bug: Small corner logo (network logo)
+    - L-bar/Sidebar: Persistent info panel on side
+
+    When to use each:
+    - CHYRON/LOWER_THIRD: Introducing a person, showing credentials
+    - BANNER: Breaking news, important announcements, section headers
+    - TICKER: Multiple headlines, stock info, sports scores
+    - BUG: Brand presence throughout video
+    - SIDEBAR: Persistent context (stats, bio, related info)
+    """
+
+    # Banner styles
+    BANNER_STYLES = {
+        "breaking": {"bg": "#CC0000", "text": "#FFFFFF", "label": "BREAKING"},
+        "alert": {"bg": "#FF6600", "text": "#FFFFFF", "label": "ALERT"},
+        "headline": {"bg": "#003366", "text": "#FFFFFF", "label": ""},
+        "update": {"bg": "#006633", "text": "#FFFFFF", "label": "UPDATE"},
+    }
+
+    def __init__(self, temp_dir: Optional[Path] = None):
+        self.temp_dir = temp_dir or Path(tempfile.mkdtemp())
+        self.temp_dir.mkdir(parents=True, exist_ok=True)
+
+    def create_banner(
+        self,
+        text: str,
+        style: str = "headline",
+        width: int = 1280,
+        height: int = 60,
+        font: str = "Arial-Bold"
+    ) -> Path:
+        """
+        Create a full-width banner overlay (breaking news style).
+
+        Args:
+            text: Banner headline text
+            style: "breaking", "alert", "headline", "update"
+            width: Video width
+            height: Banner height
+
+        Returns:
+            Path to PNG with banner graphic
+        """
+        style_config = self.BANNER_STYLES.get(style, self.BANNER_STYLES["headline"])
+        bg_color = style_config["bg"]
+        text_color = style_config["text"]
+        label = style_config["label"]
+
+        output = self.temp_dir / f"banner_{style}.png"
+
+        # Create banner with ImageMagick
+        if label:
+            # Two-part banner: label box + headline
+            cmd = [
+                "convert",
+                "-size", f"{width}x{height}",
+                f"xc:{bg_color}",
+                "-fill", "#FFFFFF",
+                "-draw", f"rectangle 0,0 120,{height}",
+                "-font", font,
+                "-pointsize", "24",
+                "-fill", bg_color,
+                "-gravity", "West",
+                "-annotate", "+15+0", label,
+                "-fill", text_color,
+                "-pointsize", "28",
+                "-annotate", f"+140+0", text,
+                str(output)
+            ]
+        else:
+            # Simple banner
+            cmd = [
+                "convert",
+                "-size", f"{width}x{height}",
+                f"xc:{bg_color}",
+                "-font", font,
+                "-pointsize", "28",
+                "-fill", text_color,
+                "-gravity", "Center",
+                "-annotate", "+0+0", text,
+                str(output)
+            ]
+
+        subprocess.run(cmd, capture_output=True)
+        return output if output.exists() else None
+
+    def create_ticker_filter(
+        self,
+        headlines: List[str],
+        speed: int = 50,
+        font_size: int = 28,
+        bg_color: str = "#003366",
+        text_color: str = "#FFFFFF",
+        video_width: int = 1280,
+        video_height: int = 720,
+        bar_height: int = 40
+    ) -> str:
+        """
+        Create FFmpeg filter for scrolling news ticker.
+
+        Args:
+            headlines: List of headline texts to scroll
+            speed: Scroll speed in pixels per second
+            video_width: Video width for positioning
+            video_height: Video height for positioning
+            bar_height: Height of ticker bar
+
+        Returns:
+            FFmpeg filter_complex string for ticker
+        """
+        # Join headlines with separator
+        full_text = "  •  ".join(headlines) + "  •  "
+
+        # Calculate y position (bottom of screen)
+        y_pos = video_height - bar_height - 10
+
+        # FFmpeg scrolling text filter
+        # Note: x scrolls from right to left using 'w-t*speed'
+        ticker_filter = (
+            f"drawbox=x=0:y={y_pos}:w={video_width}:h={bar_height}:"
+            f"color={bg_color}:t=fill,"
+            f"drawtext=text='{full_text}':"
+            f"fontfile=/System/Library/Fonts/Helvetica.ttc:"
+            f"fontsize={font_size}:"
+            f"fontcolor={text_color}:"
+            f"x=w-mod(t*{speed}\\,tw+w):"
+            f"y={y_pos + (bar_height - font_size) // 2}"
+        )
+
+        return ticker_filter
+
+    def apply_banner(
+        self,
+        video_path: Path,
+        output_path: Path,
+        text: str,
+        style: str = "headline",
+        position: str = "top",  # "top" or "bottom"
+        start_time: float = 0,
+        duration: float = 5,
+        fade: float = 0.3
+    ) -> bool:
+        """Apply banner overlay to video."""
+        # Get video dimensions
+        probe = subprocess.run([
+            "ffprobe", "-v", "error",
+            "-select_streams", "v:0",
+            "-show_entries", "stream=width,height",
+            "-of", "json",
+            str(video_path)
+        ], capture_output=True, text=True)
+
+        try:
+            data = json.loads(probe.stdout)
+            width = data["streams"][0]["width"]
+            height = data["streams"][0]["height"]
+        except:
+            width, height = 1280, 720
+
+        # Create banner PNG
+        banner_height = 60
+        banner = self.create_banner(text, style, width, banner_height)
+        if not banner:
+            return False
+
+        # Calculate y position
+        if position == "top":
+            y = 0
+        else:
+            y = height - banner_height
+
+        # Apply with timing and fade
+        end_time = start_time + duration
+        overlay_filter = (
+            f"overlay=0:{y}:"
+            f"enable='between(t,{start_time},{end_time})'"
+        )
+
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(video_path),
+            "-loop", "1", "-t", str(duration),
+            "-i", str(banner),
+            "-filter_complex",
+            f"[1:v]format=rgba,"
+            f"fade=t=in:st=0:d={fade}:alpha=1,"
+            f"fade=t=out:st={duration - fade}:d={fade}:alpha=1[ov];"
+            f"[0:v][ov]{overlay_filter}",
+            "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+            "-c:a", "copy",
+            str(output_path)
+        ]
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        return result.returncode == 0
+
+    def apply_ticker(
+        self,
+        video_path: Path,
+        output_path: Path,
+        headlines: List[str],
+        start_time: float = 0,
+        duration: float = None,  # None = entire video
+        speed: int = 100
+    ) -> bool:
+        """Apply scrolling ticker to video."""
+        # Get video info
+        probe = subprocess.run([
+            "ffprobe", "-v", "error",
+            "-show_entries", "format=duration",
+            "-show_entries", "stream=width,height",
+            "-of", "json",
+            str(video_path)
+        ], capture_output=True, text=True)
+
+        try:
+            data = json.loads(probe.stdout)
+            width = data["streams"][0]["width"]
+            height = data["streams"][0]["height"]
+            video_duration = float(data["format"]["duration"])
+        except:
+            width, height = 1280, 720
+            video_duration = 60
+
+        if duration is None:
+            duration = video_duration - start_time
+
+        # Create ticker filter
+        ticker_filter = self.create_ticker_filter(
+            headlines,
+            speed=speed,
+            video_width=width,
+            video_height=height
+        )
+
+        # Apply with timing
+        if start_time > 0:
+            ticker_filter += f":enable='gte(t,{start_time})'"
+
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(video_path),
+            "-vf", ticker_filter,
+            "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+            "-c:a", "copy",
+            str(output_path)
+        ]
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        return result.returncode == 0
 
 
 def add_motion_graphics(
