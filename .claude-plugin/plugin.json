@@ -1,7 +1,7 @@
 {
   "name": "longform-video-generator",
-  "version": "1.0.0",
-  "description": "Generate complete long-form videos from text prompts using AI. Orchestrates video generation (Veo 3.1, Kling), image generation, audio (ElevenLabs), and professional motion graphics with Lottie support.",
+  "version": "1.1.0",
+  "description": "Generate complete long-form videos from text prompts using AI. Orchestrates video generation (Veo 3.1, Kling), image generation, audio (ElevenLabs), and professional motion graphics with Lottie support. Includes video QA tools for detecting glitches and AI artifacts.",
   "author": "chadboyda",
   "license": "MIT",
   "repository": "https://github.com/chadboyda/longform-video-generator",
@@ -12,6 +12,9 @@
     "lottie",
     "motion-graphics",
     "ffmpeg",
-    "elevenlabs"
-  ]
+    "elevenlabs",
+    "video-qa",
+    "artifact-detection"
+  ],
+  "agents": "agents/"
 }
