@@ -1,0 +1,104 @@
+{
+  "title": "AppSumo_Lifetime_Freedom",
+  "target_duration_seconds": 30,
+  "hook": "Remember when tools were yours forever?",
+  "premise": "AppSumo lifetime deals let solopreneurs build without the subscription drain",
+  "call_to_action": "Own your tools. Build your dream. AppSumo.com",
+
+  "aesthetic": {
+    "name": "Nostalgic Warm",
+    "film_stock": "Kodak Portra 400 film emulation, warm skin tones, soft pastels",
+    "lens": "Vintage Cooke lens, soft focus edges, warm flare, gentle bokeh swirl",
+    "focal_length": "85mm",
+    "aperture": "f/1.8",
+    "lighting": "Golden hour natural light, warm sun, soft shadows, magical",
+    "color_grade": "Warm nostalgic grade, lifted blacks, orange shadows, teal highlights",
+    "grain": "Subtle organic film grain",
+    "colors": ["warm honey amber", "soft cream", "gentle terracotta", "natural wood"]
+  },
+
+  "characters": {
+    "protagonist": {
+      "name": "solopreneur",
+      "description": "beautiful blonde woman in her early 30s, natural wavy shoulder-length hair, warm confident smile, minimal natural makeup, wearing comfortable cream knit sweater, intelligent kind eyes, authentic and approachable, photorealistic"
+    }
+  },
+
+  "settings": {
+    "workspace": "cozy home office with large window, golden sunlight streaming in, wooden desk with laptop, coffee mug, small plant, warm minimalist decor, cream and wood tones, lived-in but organized"
+  },
+
+  "music": {
+    "style": "Warm acoustic guitar with soft piano, building hope. Indie folk feel, intimate, real, emotional.",
+    "mood_progression": ["reflective", "hopeful", "grateful", "empowered"]
+  },
+
+  "shots": [
+    {
+      "scene_number": 1,
+      "description": "Subscription Fatigue - The Hook",
+      "duration_seconds": 5,
+      "character": "solopreneur",
+      "shot_type": "medium close-up",
+      "camera_movement": "static",
+      "image_prompt": "sitting at desk, laptop screen showing subscription emails, slightly tired expression, hand on chin, afternoon light from window, relatable moment",
+      "motion_prompt": "Subtle sigh, slight shoulder drop, eyes scanning emails",
+      "voiceover": "Another month. Another round of subscriptions draining your account."
+    },
+    {
+      "scene_number": 2,
+      "description": "The Memory - What Ownership Felt Like",
+      "duration_seconds": 5,
+      "character": "solopreneur",
+      "shot_type": "close-up",
+      "camera_movement": "static",
+      "image_prompt": "Close-up of hands gently holding a vintage software manual, warm golden light illuminating the pages, nostalgic moment, cream sweater sleeves visible",
+      "motion_prompt": "Gentle thumb caressing the manual cover, appreciating tangible ownership",
+      "voiceover": "Remember when you bought something... and it was actually yours?"
+    },
+    {
+      "scene_number": 3,
+      "description": "The Discovery - Finding the Solution",
+      "duration_seconds": 5,
+      "character": "solopreneur",
+      "shot_type": "medium close-up",
+      "camera_movement": "dolly in",
+      "image_prompt": "leaning forward at desk with genuine interest, warm smile forming, laptop screen reflecting in eyes, golden hour light from window, cozy home office",
+      "motion_prompt": "Leaning forward with interest, smile spreading naturally, eyes brightening",
+      "voiceover": "AppSumo brings back lifetime deals. Pay once. Own it forever."
+    },
+    {
+      "scene_number": 4,
+      "description": "Taking Action - The Purchase",
+      "duration_seconds": 5,
+      "character": "solopreneur",
+      "shot_type": "medium shot",
+      "camera_movement": "static",
+      "image_prompt": "Over-shoulder shot at laptop, finger clicking button, screen showing purchase confirmation, satisfied confident posture, warm afternoon light",
+      "motion_prompt": "Confident click, slight nod of satisfaction, shoulders relaxing",
+      "voiceover": "Tools that work for you. Not subscriptions that work against you."
+    },
+    {
+      "scene_number": 5,
+      "description": "The Payoff - Working in Flow",
+      "duration_seconds": 5,
+      "character": "solopreneur",
+      "shot_type": "medium shot",
+      "camera_movement": "slow pan right",
+      "image_prompt": "working at desk with peaceful contentment, genuine focus and slight smile, coffee cup in hand, late afternoon golden light, plants visible, cozy productive scene",
+      "motion_prompt": "Natural working rhythm, occasional sip of coffee, genuine contentment",
+      "voiceover": "Build your business with tools you own. No surprises. No stress."
+    },
+    {
+      "scene_number": 6,
+      "description": "The Close - Looking Forward",
+      "duration_seconds": 5,
+      "character": "solopreneur",
+      "shot_type": "medium close-up",
+      "camera_movement": "slow dolly in",
+      "image_prompt": "Profile shot looking out large window, golden sunset light illuminating face, peaceful hopeful expression, dreamy bokeh background",
+      "motion_prompt": "Gentle turn toward window, soft smile, breathing in the moment",
+      "voiceover": "AppSumo. Own your tools. Build your dream."
+    }
+  ]
+}
