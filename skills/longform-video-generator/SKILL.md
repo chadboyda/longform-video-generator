@@ -4,15 +4,18 @@ description: |
   Generate complete long-form videos from text prompts using AI. Orchestrates
   video generation (Veo 3.1, Kling), image generation (Nano Banana Pro), audio
   (ElevenLabs music/SFX/TTS with timestamps), and professional motion graphics.
+  Includes video QA tools for detecting glitches and AI artifacts.
 
   Use when: (1) Creating multi-scene videos from prompts, (2) Generating AI
   videos with background music, (3) Adding motion graphics/overlays to video,
   (4) Voiceover-driven timeline assembly, (5) Image-to-video workflows,
-  (6) Adding Lottie animations, banners, tickers, lower thirds to video.
+  (6) Adding Lottie animations, banners, tickers, lower thirds to video,
+  (7) Reviewing video clips for quality issues and AI artifacts.
 
   Triggers: "generate video", "create longform video", "make AI video",
   "fal.ai video", "add overlay", "motion graphics", "lower third",
-  "news ticker", "banner overlay", "Lottie animation"
+  "news ticker", "banner overlay", "Lottie animation", "review video",
+  "check video quality", "detect glitches", "extract frames"
 ---
 
 # Long-Form Video Generator
@@ -95,6 +98,36 @@ results = search.get_curated("money")  # business, subscribe, arrow, success, lo
 results = search.find_for_concept("SaaS product launch")
 ```
 
+### 5. Video Review & QA
+
+```python
+from scripts.video_review import VideoReviewer, review_video
+
+# Quick review with contact sheet
+report = review_video(Path("video.mp4"))
+print(report["recommendation"])
+
+# Detailed review
+reviewer = VideoReviewer()
+
+# Generate contact sheet for quick visual check
+sheet = reviewer.generate_contact_sheet(video_path)
+
+# Generate strips for temporal analysis
+strips = reviewer.generate_visual_review_strip(video_path)
+
+# Full analysis (glitches + AI artifacts)
+glitch_report = reviewer.analyze_video(video_path)
+if glitch_report.ai_artifacts:
+    for a in glitch_report.ai_artifacts:
+        print(f"{a.timestamp}s: {a.description}")
+
+# Extract frames for visual inspection
+frames = reviewer.extract_review_frames(video_path, interval=0.5)
+```
+
+See `references/ai_artifacts_guide.md` for common AI artifact types.
+
 ## Models
 
 | Type | Model | ID | Best For |
@@ -140,6 +173,7 @@ See `references/overlay_guide.md` for detailed selection guidance.
 |--------|---------|
 | `generate_longform.py` | Single-prompt video generation |
 | `motion_graphics.py` | Overlay rendering and compositing |
+| `video_review.py` | QA, glitch detection, AI artifact detection |
 | `overlay_manager.py` | Intelligent overlay placement |
 | `lottie_search.py` | LottieFiles search & download |
 | `design_system.py` | Typography & color extraction |
@@ -151,5 +185,6 @@ See `references/overlay_guide.md` for detailed selection guidance.
 ## References
 
 - `references/overlay_guide.md` - Overlay selection and FFmpeg rules
+- `references/ai_artifacts_guide.md` - AI artifact detection and prompt fixes
 - `references/fal_api_reference.md` - API documentation
 - `references/prompting_guide.md` - Video prompt strategies
